@@ -1,5 +1,7 @@
 import './App.css';
-import API from './API.jsx'
+ import API from './API.jsx'
+import { Provider } from 'react-redux'
+import { store } from './store/store.js'
 
 function App() {
 
@@ -7,8 +9,10 @@ function App() {
   return (
     <>
      
-      <div>
-         <API/>
+    <div>
+      <Provider store={store}>
+              <API />
+       </Provider>
       </div>
     
     </>
