@@ -1,5 +1,5 @@
 import { useGetAdminQuery } from "./services/adminApi";
- import { setAdminUser , deleteUser , editUser , selectedCheckBox , deleteAllChecked } from "./features/adminSlice";
+import { setAdminUser , deleteUser , editUser , selectedCheckBox , deleteAllChecked } from "./features/adminSlice";
 import { useSelector, useDispatch  } from "react-redux";
 import { useEffect ,useState } from "react";
 import { useRef } from 'react';
@@ -24,24 +24,40 @@ const API = () => {
       const [editUserValue , seteditUserValue] = useState(false);
       const [clickedId , setClickedId ] = useState(0);
       const [ itemToSearch , setItemToSearch ] = useState([]);
-      const [ selectedBox , setSelectedBox ] = useState({});
+      const [ selectedBox , setSelectedBox ] = useState([]);
       const [ itemsPerPage ] = useState(10);
+      const [allSelected , setAllSelected ] = useState(false);
 
     //
       const focusPoint = useRef(null);
 
      
-      //deleteALl button will have function to delete all the box checked user's data 
+      //deleteALl button will have function to delete all the selected checkbox user's data 
        const deleteAll =()=>{
-          dispatch (deleteAllChecked(checked))
+          dispatch (deleteAllChecked())
+          if(allSelected)
+           setAllSelected(false);
         } 
  
- 
+     
+        const selectAll = ()=>{
+          let stIndex = ( currentPage - 1 ) * 10 ;
+          setAllSelected(true) 
+
+          for( let i = stIndex ; i <  (stIndex + 10) && adminUser[i] !== undefined ; i++)
+            {
+             handleSelectBox(adminUser[i].id);
+            }
+            console.log('adminuserlengthafteralldeletedd', adminUser.length)
+        }
    
       //useEffect hook to save the required data in adminUser when RTK query data is fully fetched initially to prevent unnecessary rerenders 
       useEffect (()=>{
         if(data)
            dispatch(setAdminUser(data));
+
+        const initialSelectedBox = data?.map(item => ({ id: item.id, selected: false }));
+          setSelectedBox(initialSelectedBox);
     
       },[data , dispatch]);
 
@@ -63,17 +79,18 @@ const API = () => {
 
 
   //function to select the box and changing/toggling the state of each box 
-   const handleSelectBox = (id) => {
-        setSelectedBox((prevState) => {
-         const newState ={
-            ...prevState,             
-          [id] : !prevState[id]
-      }
-      dispatch(selectedCheckBox(newState))
+  const handleSelectBox = (id) => {
+
+    setSelectedBox((prevState) => {
+      const newState = prevState.map(item =>
+        item.id === id ? { ...item, selected: !item.selected } : item
+      );
+      //dispatching the newstate by creating the entire newState and not making changes in the previous state to avoid unnecessary renders
+      dispatch(selectedCheckBox(newState));
+      console.log('select' , selectedBox)
       return newState;
-   });
-    };
-        
+    });
+  };  
 
 
     //function to search the user data matching with the input with ( mail , name or role ) 
@@ -143,8 +160,11 @@ const API = () => {
       },1000);
 
       //consoling error in case data is not fetched through API
-      if (isLoading) return <p>Loading...</p>;
+      if (isLoading) return <h3>Loading...</h3>;
       if (error) return <p>Error: {error.message}</p>;
+
+
+
 
   return (  
     <div>
@@ -163,7 +183,12 @@ const API = () => {
            <Table>
              <thead>
                 <tr>
-                  <th></th>
+                  {/* <th></th> */}
+                  <th>  <input type = 'checkbox' 
+                                style={{"color" : 'white' }} 
+                                 checked={allSelected ? true : false} 
+                                onChange={selectAll}
+                               /></th>
                   <th> Name</th>
                   <th> Email </th>
                   <th>Role</th>
@@ -180,10 +205,10 @@ const API = () => {
                         currentItems.map((item ,ind)=> {
                           return <>
                           
-                        <tr key = {ind}>
+                        <tr key = {item.id}>
                           <td> <input type = 'checkbox' 
                                 style={{"color" : 'white' }} 
-                                checked={selectedBox[item.id] || false}
+                                checked={selectedBox.find(box => box.id === item.id)?.selected || false} 
                                 onChange={()=>handleSelectBox(item.id)}
                                />
                          </td>

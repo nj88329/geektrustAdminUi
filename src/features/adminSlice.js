@@ -1,5 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit'
-import { useEffect } from 'react';
+import { createSlice } from '@reduxjs/toolkit';
 
 
 //creating the initial state of the app 
@@ -44,15 +43,25 @@ export const adminSlice = createSlice({
             console.log('after', state.adminUser)
         },
         selectedCheckBox :(state , action)=>{
-              console.log('action', action.payload);
+              state.checked = action.payload;
+              console.log('checked',  state.checked)
         },
-        deleteAllChecked :(state ,action)=>{
-            console.log('actionpalo', action.payload)
-            // state.adminUser = state.adminUser.filter((user)=>{
-                
-            //     return state.checked.
-               
-            // })
+
+        //function to delete the  all the checkedbox 
+        deleteAllChecked :(state)=>{
+
+            state.adminUser = state.adminUser.filter((user) =>
+                {
+                    let status = false;
+                     state.checked.forEach((inneruser)=>{
+                         if(user.id === inneruser.id && inneruser.selected === true )
+                             {
+                                status = true;
+                             }                             
+                     })
+                    if( !status )  
+                     return user;
+                }) 
         }
     }
 })
