@@ -35,11 +35,12 @@ const API = () => {
       //deleteALl button will have function to delete all the selected checkbox user's data 
        const deleteAll =()=>{
           dispatch (deleteAllChecked())
-          if(allSelected)
+          if(allSelected){
            setAllSelected(false);
+          }
         } 
  
-     
+     // selects all the checkbox for the particular page
         const selectAll = ()=>{
           let stIndex = ( currentPage - 1 ) * 10 ;
           setAllSelected(true) 
